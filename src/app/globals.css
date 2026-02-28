@@ -1,0 +1,88 @@
+@import "tailwindcss";
+
+/* =========================
+   THEME TOKENS (Tailwind v4)
+   ========================= */
+@theme{
+  /* Brand Colors */
+  --color-noir: #0D0D0D;
+  --color-ivory: #FAF7F2;
+  --color-blush: #F5E6E8;
+
+  --color-gold: #C9A84C;
+  --color-gold-hover: #A8873A;
+  --color-gold-light: #EDD98A;
+  --color-gold-muted: #D4BC7D;
+
+  --color-rose-deep: #8B2635;
+  --color-rose-soft: #E8C5CB;
+
+  --color-plum: #4A1942;
+  --color-plum-light: #7A3A72;
+  --color-taupe: #9E8E82;
+
+  /* Fonts - Simplified and mapped to Tailwind classes */
+  --font-display: "Playfair Display", serif;
+  --font-sans: "DM Sans", sans-serif;
+  
+  /* Adding your custom animation to the theme so you can use 'animate-marquee' */
+  --animate-marquee: marquee 15s linear infinite;
+   --animate-shimmer: shimmer 1.6s ease-in-out infinite;
+   --animate-float: float 6s ease-in-out infinite;
+   /* Box Shadows */
+  --shadow-gold-lg: 0 10px 30px -10px rgba(212, 175, 55, 0.45);
+
+  /* Colors */
+  --color-taupe: #8B7D6B;
+ 
+
+
+  @keyframes marquee {
+    from { transform: translateX(100%); }
+    to { transform: translateX(-100%); }
+  }
+  @keyframes shimmer {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-12px); }
+  100% { transform: translateY(0px); }
+}
+
+}
+
+/* =========================
+   GLOBAL STYLES
+   ========================= */
+
+/* Use the variables defined in @theme for consistency */
+body {
+  background-color: var(--color-ivory);
+  color: var(--color-noir);
+  /* This ensures the whole site defaults to your body font */
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-ivory);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-gold);
+  border-radius: 10px;
+}
+
+/* Selection */
+::selection {
+  background: var(--color-gold-light);
+  color: var(--color-noir);
+}
+
