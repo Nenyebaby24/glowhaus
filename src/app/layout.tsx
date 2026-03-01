@@ -37,7 +37,20 @@ export default function RootLayout({
         </main>
 
         <Footer />
-        <Toaster position="top-center" />
+        <Toaster  
+         position="bottom-right"
+         gutter={8}
+         containerStyle={{
+         bottom: 24,
+         right: 24,
+         }}
+        toastOptions={{
+        duration: 3500,
+        ariaProps: {
+         role: "status",
+         "aria-live": "polite",
+         },
+        }}/>
         <SearchHotkey />
         <SearchOverlay />
       </body>
