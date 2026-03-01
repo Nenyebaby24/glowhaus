@@ -6,6 +6,7 @@ import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { Toaster } from "react-hot-toast"
 
+
 import "@fontsource/playfair-display/400.css"
 import "@fontsource/playfair-display/700.css"
 import "@fontsource/dm-sans/400.css"

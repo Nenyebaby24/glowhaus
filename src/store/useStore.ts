@@ -81,53 +81,38 @@ interface UISlice {
 }
 
 /* ---------------- USER SLICE ---------------- */
-
-interface UserSlice {
-  displayName: string;
-  email: string;
-  avatar: string;
-  isLoggedIn: boolean;
-}
-interface Address {
-  id: string;
-  name: string;
-  street: string;
-  city: string;
-  state: string;
-  postalCode: string;
-  phone: string;
-  isDefault?: boolean;
+export interface Address {
+  id: string
+  value: string
 }
 
-interface NotificationSettings {
-  emailOffers: boolean;
-  emailOrders: boolean;
-  emailAppointments: boolean;
-  smsDelivery: boolean;
-  smsAppointments: boolean;
+export interface Notifications {
+  emailOffers: boolean
+  orderUpdates: boolean
+  newArrivals: boolean
 }
 
-interface UserSlice {
-  displayName: string;
-  email: string;
-  avatar: string;
-  phone?: string;
-  dateOfBirth?: string;
-  isLoggedIn: boolean;
+export interface User {
+  name: string
+  email: string
+}
 
-  addresses: Address[];
-  notifications: NotificationSettings;
+export interface UserSlice {
+  user: User | null
+  isLoggedIn: boolean
 
-  updateProfile: (data: Partial<UserSlice>) => void;
+  addresses: Address[]
+  notifications: Notifications
 
-  addAddress: (address: Address) => void;
-  updateAddress: (id: string, data: Partial<Address>) => void;
-  deleteAddress: (id: string) => void;
+  updateUser: (data: Partial<User>) => void
 
-  toggleNotification: (key: keyof NotificationSettings) => void;
+  addAddress: (value: string) => void
+  updateAddress: (id: string, value: string) => void
+  deleteAddress: (id: string) => void
 
-  signOutAllDevices: () => void;
-  deleteAccount: () => void;
+  toggleNotification: (key: keyof Notifications) => void
+
+  deleteAccount: () => void
 }
 
 /* ---------------- RECENTLY VIEWED SLICE ---------------- */
@@ -422,86 +407,80 @@ export const useStore = create<StoreState>()(
 
         /* ---------------- USER ---------------- */
 
-        displayName: "Guest User",
-        email: "guest@example.com",
-        avatar: "",
-        isLoggedIn: true,
-        /* ---------------- USER EXTENDED ---------------- */
-
-phone: "",
-dateOfBirth: "",
-
-addresses: [
-  {
-    id: crypto.randomUUID(),
-    name: "Home",
-    street: "12 Victoria Island",
-    city: "Lagos",
-    state: "Lagos",
-    postalCode: "101001",
-    phone: "08012345678",
-    isDefault: true,
+        
+  user: {
+    name: "Jane Doe",
+    email: "jane@example.com",
   },
-  {
-    id: crypto.randomUUID(),
-    name: "Office",
-    street: "22 Admiralty Way",
-    city: "Lagos",
-    state: "Lagos",
-    postalCode: "101233",
-    phone: "08087654321",
-  },
-],
 
-notifications: {
-  emailOffers: true,
-  emailOrders: true,
-  emailAppointments: true,
-  smsDelivery: true,
-  smsAppointments: true,
-},
+  isLoggedIn: true,
 
-updateProfile: (data) =>
-  set((state) => ({
-    ...data,
-  })),
-
-addAddress: (address) =>
-  set((state) => ({
-    addresses: [...state.addresses, address],
-  })),
-
-updateAddress: (id, data) =>
-  set((state) => ({
-    addresses: state.addresses.map((a) =>
-      a.id === id ? { ...a, ...data } : a
-    ),
-  })),
-
-deleteAddress: (id) =>
-  set((state) => ({
-    addresses: state.addresses.filter((a) => a.id !== id),
-  })),
-
-toggleNotification: (key) =>
-  set((state) => ({
-    notifications: {
-      ...state.notifications,
-      [key]: !state.notifications[key],
+  addresses: [
+    {
+      id: "1",
+      value: "221B Baker Street, London",
     },
-  })),
+  ],
 
-signOutAllDevices: () => set({ isLoggedIn: false }),
+  notifications: {
+    emailOffers: true,
+    orderUpdates: true,
+    newArrivals: false,
+  },
 
-deleteAccount: () =>
-  set({
-    displayName: "",
-    email: "",
-    avatar: "",
-    addresses: [],
-    isLoggedIn: false,
+  /* =========================
+     USER ACTIONS
+  ========================== */
+
+  updateUser: (data) =>
+    set((state) => ({
+      user: state.user
+        ? { ...state.user, ...data }
+        : state.user,
+    })),
+
+  addAddress: (value) =>
+    set((state) => ({
+      addresses: [
+        ...state.addresses,
+        {
+          id: crypto.randomUUID(),
+          value,
+        },
+      ],
+    })),
+
+  updateAddress: (id, value) =>
+    set((state) => ({
+      addresses: state.addresses.map((addr) =>
+        addr.id === id ? { ...addr, value } : addr
+      ),
+    })),
+
+  deleteAddress: (id) =>
+    set((state) => ({
+      addresses: state.addresses.filter(
+        (addr) => addr.id !== id
+      ),
+    })),
+
+  toggleNotification: (key) =>
+    set((state) => ({
+      notifications: {
+        ...state.notifications,
+        [key]: !state.notifications[key],
+      },
+    })),
+
+  deleteAccount: () =>
+    set(() => ({
+      user: null,
+      isLoggedIn: false,
+      addresses: [],
+    })),
+
   }),
-      }),
+      
       {
         name: "app-storage",
         partialize: (state) => ({
