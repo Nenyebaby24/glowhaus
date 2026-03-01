@@ -27,6 +27,8 @@ interface WishlistSlice {
   addToWishlist: (product: Product) => void;
   removeFromWishlist: (id: string) => void;
   isWishlisted: (id: string) => boolean;
+  moveWishlistToCart: (id: string) => void;
+  clearWishlist: () => void;
 }
 
 /* ---------------- LOYALTY SLICE ---------------- */
@@ -174,28 +176,69 @@ export const useStore = create<StoreState>()(
           );
         },
 
-        /* ---------------- WISHLIST ---------------- */
+    /* ---------------- WISHLIST ---------------- */
 
-        wishlistItems: [],
+             wishlistItems: [],
 
-        addToWishlist: (product) =>
-          set((state) => {
-            if (state.wishlistItems.some((p) => p.id === product.id)) {
-              return state;
+            addToWishlist: (product) =>
+            set((state) => {
+         if (state.wishlistItems.some((p) => p.id === product.id)) {
+           return state;
             }
 
             return {
-              wishlistItems: [...state.wishlistItems, product],
-            };
-          }),
+           wishlistItems: [...state.wishlistItems, product],
+           };
+           }),
 
         removeFromWishlist: (id) =>
-          set((state) => ({
-            wishlistItems: state.wishlistItems.filter((p) => p.id !== id),
-          })),
+        set((state) => ({
+         wishlistItems: state.wishlistItems.filter((p) => p.id !== id),
+           })),
 
-        isWishlisted: (id) =>
-          get().wishlistItems.some((p) => p.id === id),
+         isWishlisted: (id) =>
+         get().wishlistItems.some((p) => p.id === id),
+
+         moveWishlistToCart: (id) =>
+          set((state) => {
+         const product = state.wishlistItems.find((p) => p.id === id);
+         if (!product) return state;
+
+          const existing = state.cartItems.find(
+          (item) => item.product.id === product.id
+         );
+
+        let updatedCart;
+
+        if (existing) {
+          updatedCart = state.cartItems.map((item) =>
+            item.product.id === product.id
+          ? { ...item, quantity: item.quantity + 1 }
+          : item
+          );
+           } else {
+          updatedCart = [
+          ...state.cartItems,
+          {
+          id: crypto.randomUUID(),
+          product,
+          quantity: 1,
+          },
+         ];
+         }
+
+           return {
+         cartItems: updatedCart,
+          wishlistItems: state.wishlistItems.filter(
+        (p) => p.id !== id
+          ),
+          };
+         }),
+
+        clearWishlist: () =>
+        set(() => ({
+         wishlistItems: [],
+           })),
 
         /* ---------------- LOYALTY ---------------- */
 

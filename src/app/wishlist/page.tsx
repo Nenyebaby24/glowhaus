@@ -24,7 +24,7 @@ export default function WishlistPage() {
         return [...wishlistItems].sort((a, b) => b.price - a.price)
       case "category":
         return [...wishlistItems].sort((a, b) =>
-          a.category.localeCompare(b.category)
+          a.category!.localeCompare(b.category!)
         )
       default:
         return [...wishlistItems]
