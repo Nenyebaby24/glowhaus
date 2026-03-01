@@ -88,6 +88,47 @@ interface UserSlice {
   avatar: string;
   isLoggedIn: boolean;
 }
+interface Address {
+  id: string;
+  name: string;
+  street: string;
+  city: string;
+  state: string;
+  postalCode: string;
+  phone: string;
+  isDefault?: boolean;
+}
+
+interface NotificationSettings {
+  emailOffers: boolean;
+  emailOrders: boolean;
+  emailAppointments: boolean;
+  smsDelivery: boolean;
+  smsAppointments: boolean;
+}
+
+interface UserSlice {
+  displayName: string;
+  email: string;
+  avatar: string;
+  phone?: string;
+  dateOfBirth?: string;
+  isLoggedIn: boolean;
+
+  addresses: Address[];
+  notifications: NotificationSettings;
+
+  updateProfile: (data: Partial<UserSlice>) => void;
+
+  addAddress: (address: Address) => void;
+  updateAddress: (id: string, data: Partial<Address>) => void;
+  deleteAddress: (id: string) => void;
+
+  toggleNotification: (key: keyof NotificationSettings) => void;
+
+  signOutAllDevices: () => void;
+  deleteAccount: () => void;
+}
 
 /* ---------------- RECENTLY VIEWED SLICE ---------------- */
 
@@ -385,6 +426,81 @@ export const useStore = create<StoreState>()(
         email: "guest@example.com",
         avatar: "",
         isLoggedIn: true,
+        /* ---------------- USER EXTENDED ---------------- */
+
+phone: "",
+dateOfBirth: "",
+
+addresses: [
+  {
+    id: crypto.randomUUID(),
+    name: "Home",
+    street: "12 Victoria Island",
+    city: "Lagos",
+    state: "Lagos",
+    postalCode: "101001",
+    phone: "08012345678",
+    isDefault: true,
+  },
+  {
+    id: crypto.randomUUID(),
+    name: "Office",
+    street: "22 Admiralty Way",
+    city: "Lagos",
+    state: "Lagos",
+    postalCode: "101233",
+    phone: "08087654321",
+  },
+],
+
+notifications: {
+  emailOffers: true,
+  emailOrders: true,
+  emailAppointments: true,
+  smsDelivery: true,
+  smsAppointments: true,
+},
+
+updateProfile: (data) =>
+  set((state) => ({
+    ...data,
+  })),
+
+addAddress: (address) =>
+  set((state) => ({
+    addresses: [...state.addresses, address],
+  })),
+
+updateAddress: (id, data) =>
+  set((state) => ({
+    addresses: state.addresses.map((a) =>
+      a.id === id ? { ...a, ...data } : a
+    ),
+  })),
+
+deleteAddress: (id) =>
+  set((state) => ({
+    addresses: state.addresses.filter((a) => a.id !== id),
+  })),
+
+toggleNotification: (key) =>
+  set((state) => ({
+    notifications: {
+      ...state.notifications,
+      [key]: !state.notifications[key],
+    },
+  })),
+
+signOutAllDevices: () => set({ isLoggedIn: false }),
+
+deleteAccount: () =>
+  set({
+    displayName: "",
+    email: "",
+    avatar: "",
+    addresses: [],
+    isLoggedIn: false,
+  }),
       }),
       {
         name: "app-storage",
@@ -404,4 +520,5 @@ export const useStore = create<StoreState>()(
     ),
     { enabled: process.env.NODE_ENV === "development" }
   )
+  
 );
