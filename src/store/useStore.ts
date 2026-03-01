@@ -489,10 +489,10 @@ export const useStore = create<StoreState>()(
           points: state.points,
           tier: state.tier,
           pointsHistory: state.pointsHistory,
-          displayName: state.displayName,
-          email: state.email,
-          avatar: state.avatar,
+          user: state.user,
           isLoggedIn: state.isLoggedIn,
+          addresses: state.addresses,
+          notifications: state.notifications,
           recentlyViewed: state.recentlyViewed,
         }),
       }
@@ -501,3 +501,4 @@ export const useStore = create<StoreState>()(
   )
   
 );
+export default useStore;

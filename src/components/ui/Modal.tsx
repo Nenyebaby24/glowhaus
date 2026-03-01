@@ -4,8 +4,11 @@ import * as Dialog from "@radix-ui/react-dialog"
 import { X } from "lucide-react"
 
 interface ModalProps {
-  trigger: React.ReactNode
+  trigger?: React.ReactNode
   children: React.ReactNode
+  open?: boolean           // Add this
+  onOpenChange?: (open: boolean) => void // Add this (acts as onClose)
+
 }
 
 export function Modal({ trigger, children }: ModalProps) {
@@ -27,3 +30,4 @@ export function Modal({ trigger, children }: ModalProps) {
     </Dialog.Root>
   )
 }
+export default Modal

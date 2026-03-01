@@ -107,17 +107,21 @@ export default function ProfilePage() {
       {/* ================= PERSONAL INFO ================= */}
       {activeTab === "personal" && (
         <div className="space-y-6 max-w-lg">
-          <TextInput
-            label="Full Name"
-            value={name}
-            onChange={(e: any) => setName(e.target.value)}
-          />
-          <TextInput
-            label="Email"
-            type="email"
-            value={email}
-            onChange={(e: any) => setEmail(e.target.value)}
-          />
+          <div>
+            <label className="block text-sm font-medium mb-2">Full Name</label>
+            <TextInput
+              value={name}
+              onChange={(e: any) => setName(e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-2">Email</label>
+            <TextInput
+              type="email"
+              value={email}
+              onChange={(e: any) => setEmail(e.target.value)}
+            />
+          </div>
           <Button onClick={handleSavePersonal}>Save Changes</Button>
         </div>
       )}
@@ -142,7 +146,6 @@ export default function ProfilePage() {
               >
                 <span>{addr.value}</span>
                 <Button
-                  variant="secondary"
                   onClick={() => deleteAddress(addr.id)}
                 >
                   Delete
@@ -166,14 +169,14 @@ export default function ProfilePage() {
               </span>
 
               <button
-                onClick={() => toggleNotification(key)}
+                onClick={() => toggleNotification(key as keyof typeof notifications)}
                 className={`w-12 h-6 flex items-center rounded-full p-1 transition ${
-                  notifications[key] ? "bg-black" : "bg-gray-300"
+                  notifications?.[key as keyof typeof notifications] ? "bg-black" : "bg-gray-300"
                 }`}
               >
                 <div
                   className={`w-4 h-4 bg-white rounded-full transform transition ${
-                    notifications[key] ? "translate-x-6" : ""
+                    notifications?.[key as keyof typeof notifications] ? "translate-x-6" : ""
                   }`}
                 />
               </button>
@@ -185,24 +188,30 @@ export default function ProfilePage() {
       {/* ================= PASSWORD ================= */}
       {activeTab === "password" && (
         <div className="space-y-6 max-w-lg">
-          <TextInput
-            label="Current Password"
-            type="password"
-            value={currentPassword}
-            onChange={(e: any) => setCurrentPassword(e.target.value)}
-          />
-          <TextInput
-            label="New Password"
-            type="password"
-            value={newPassword}
-            onChange={(e: any) => setNewPassword(e.target.value)}
-          />
-          <TextInput
-            label="Confirm New Password"
-            type="password"
-            value={confirmPassword}
-            onChange={(e: any) => setConfirmPassword(e.target.value)}
-          />
+          <div>
+            <label className="block text-sm font-medium mb-2">Current Password</label>
+            <TextInput
+              type="password"
+              value={currentPassword}
+              onChange={(e: any) => setCurrentPassword(e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-2">New Password</label>
+            <TextInput
+              type="password"
+              value={newPassword}
+              onChange={(e: any) => setNewPassword(e.target.value)}
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-2">Confirm New Password</label>
+            <TextInput
+              type="password"
+              value={confirmPassword}
+              onChange={(e: any) => setConfirmPassword(e.target.value)}
+            />
+          </div>
 
           <Button onClick={handlePasswordChange}>
             Update Password
@@ -210,7 +219,6 @@ export default function ProfilePage() {
 
           <div className="pt-8 border-t">
             <Button
-              variant="secondary"
               onClick={() => setShowDeleteModal(true)}
             >
               Delete Account
@@ -220,25 +228,26 @@ export default function ProfilePage() {
       )}
 
       {/* ================= DELETE MODAL ================= */}
-      <Modal isOpen={showDeleteModal} onClose={() => setShowDeleteModal(false)}>
-        <div className="space-y-6">
-          <h2 className="text-xl font-semibold">Confirm Account Deletion</h2>
-          <p className="text-gray-600">
-            This action cannot be undone. Are you sure?
-          </p>
-          <div className="flex justify-end gap-3">
-            <Button
-              variant="secondary"
-              onClick={() => setShowDeleteModal(false)}
-            >
-              Cancel
-            </Button>
-            <Button onClick={confirmDeleteAccount}>
-              Confirm Delete
-            </Button>
+      {showDeleteModal && (
+        <Modal open={showDeleteModal} onOpenChange={setShowDeleteModal}>
+          <div className="space-y-6">
+            <h2 className="text-xl font-semibold">Confirm Account Deletion</h2>
+            <p className="text-gray-600">
+              This action cannot be undone. Are you sure?
+            </p>
+            <div className="flex justify-end gap-3">
+              <Button
+                onClick={() => setShowDeleteModal(false)}
+              >
+                Cancel
+              </Button>
+              <Button onClick={confirmDeleteAccount}>
+                Confirm Delete
+              </Button>
+            </div>
           </div>
-        </div>
-      </Modal>
+        </Modal>
+      )}
     </div>
   )
 }
