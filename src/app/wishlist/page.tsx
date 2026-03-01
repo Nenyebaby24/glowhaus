@@ -36,12 +36,20 @@ export default function WishlistPage() {
   const handleRemove = (product: any) => {
     removeFromWishlist(product.id)
 
-    toast.success("Removed from wishlist", {
-      action: {
-        label: "Undo",
-        onClick: () => addToWishlist(product),
-      },
-    })
+    toast((t) => (
+      <div className="flex justify-between items-center gap-4">
+        <span>Removed from wishlist</span>
+        <button
+          onClick={() => {
+            addToWishlist(product)
+            toast.dismiss(t.id)
+          }}
+          className="underline font-semibold"
+        >
+          Undo
+        </button>
+      </div>
+    ))
   }
 
   /* ---------------- MOVE TO CART ---------------- */
@@ -164,4 +172,8 @@ function Recommendations({ wishlistItems }: any) {
       </div>
     </div>
   )
+}
+
+function addToWishlist(product: any) {
+  throw new Error("Function not implemented.")
 }
