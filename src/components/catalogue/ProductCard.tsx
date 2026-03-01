@@ -1,9 +1,8 @@
 "use client"
 import { motion, AnimatePresence } from "framer-motion"
-import { Heart, Star, Eye, ShoppingCart } from "lucide-react"
+import { Heart, Star, Eye, ShoppingCart, X } from "lucide-react"
 import { useState } from "react"
-import {useStore} from "@/store/useStore"
-
+import { useStore } from "@/store/useStore"
 
 interface Product {
   id: string
@@ -22,27 +21,38 @@ interface Product {
 
 interface Props {
   product: Product
+  isWishlist?: boolean
+  onRemove?: () => void
+  onMoveToCart?: () => void
 }
 
-export default function ProductCard({ product }: Props) {
+export default function ProductCard({
+  product,
+  isWishlist,
+  onRemove,
+  onMoveToCart,
+}: Props) {
   const [hovered, setHovered] = useState(false)
   const [quickViewOpen, setQuickViewOpen] = useState(false)
 
- const { 
-  addToCart, 
-  wishlistItems, 
-  addToWishlist, 
-  removeFromWishlist 
-} = useStore();
-  const isWishlisted = wishlistItems.some((item) => item.id === product.id);
+  const {
+    addToCart,
+    wishlistItems,
+    addToWishlist,
+    removeFromWishlist,
+  } = useStore()
 
-const handleToggleWishlist = () => {
-  if (isWishlisted) {
-    removeFromWishlist(product.id);
-  } else {
-    addToWishlist(product);
+  const isWishlisted = wishlistItems.some(
+    (item) => item.id === product.id
+  )
+
+  const handleToggleWishlist = () => {
+    if (isWishlisted) {
+      removeFromWishlist(product.id)
+    } else {
+      addToWishlist(product)
+    }
   }
-};
 
   const soldOut = !product.inStock
 
@@ -54,6 +64,16 @@ const handleToggleWishlist = () => {
         onHoverEnd={() => setHovered(false)}
         className="group relative bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-gold-lg transition-shadow duration-300"
       >
+        {/* REMOVE BUTTON (Wishlist Mode Only) */}
+        {isWishlist && (
+          <button
+            onClick={onRemove}
+            className="absolute top-3 right-3 z-20 bg-white p-2 rounded-full shadow"
+          >
+            <X size={16} />
+          </button>
+        )}
+
         {/* IMAGE CONTAINER */}
         <div className="relative aspect-[3/4] overflow-hidden">
           <motion.img
@@ -95,20 +115,22 @@ const handleToggleWishlist = () => {
             )}
           </div>
 
-          {/* WISHLIST */}
-          <button
-            onClick={handleToggleWishlist}
-            className="absolute top-4 right-4 bg-white/90 backdrop-blur-md p-2 rounded-full shadow"
-          >
-            <Heart
-              size={18}
-              className={
-                isWishlisted
-                  ? "fill-gold text-gold"
-                  : "text-gray-600"
-              }
-            />
-          </button>
+          {/* WISHLIST HEART (Hidden in Wishlist Mode) */}
+          {!isWishlist && (
+            <button
+              onClick={handleToggleWishlist}
+              className="absolute top-4 right-4 bg-white/90 backdrop-blur-md p-2 rounded-full shadow"
+            >
+              <Heart
+                size={18}
+                className={
+                  isWishlisted
+                    ? "fill-gold text-gold"
+                    : "text-gray-600"
+                }
+              />
+            </button>
+          )}
 
           {/* HOVER ACTION BAR */}
           <AnimatePresence>
@@ -120,13 +142,25 @@ const handleToggleWishlist = () => {
                 transition={{ duration: 0.3 }}
                 className="absolute bottom-0 left-0 right-0 bg-white p-4 flex gap-2"
               >
-                <button
-                  onClick={() => addToCart(product)}
-                  className="flex-1 bg-black text-white py-2 rounded-lg text-sm font-medium"
-                >
-                  <ShoppingCart size={16} className="inline mr-2" />
-                  Add to Cart
-                </button>
+                {isWishlist ? (
+                  <button
+                    onClick={onMoveToCart}
+                    className="flex-1 bg-black text-white py-2 rounded-lg text-sm font-medium"
+                  >
+                    Move to Cart
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => addToCart(product)}
+                    className="flex-1 bg-black text-white py-2 rounded-lg text-sm font-medium"
+                  >
+                    <ShoppingCart
+                      size={16}
+                      className="inline mr-2"
+                    />
+                    Add to Cart
+                  </button>
+                )}
 
                 <button
                   onClick={() => setQuickViewOpen(true)}
@@ -179,13 +213,21 @@ const handleToggleWishlist = () => {
           {/* MOBILE BUTTON */}
           <button
             onClick={() =>
-              soldOut
+              isWishlist
+                ? onMoveToCart
+                ? onMoveToCart()
+                : null
+                : soldOut
                 ? alert("Notify feature coming soon")
                 : addToCart(product)
             }
             className="lg:hidden w-full mt-3 py-2 border rounded-lg text-sm font-medium"
           >
-            {soldOut ? "Notify Me" : "Add to Cart"}
+            {isWishlist
+              ? "Move to Cart"
+              : soldOut
+              ? "Notify Me"
+              : "Add to Cart"}
           </button>
         </div>
       </motion.div>
@@ -203,7 +245,14 @@ const handleToggleWishlist = () => {
   )
 }
 
-function Badge({ label, color }: { label: string; color: string }) {
+/* BADGE */
+function Badge({
+  label,
+  color,
+}: {
+  label: string
+  color: string
+}) {
   return (
     <span
       className={`text-white text-xs px-3 py-1 rounded-full font-medium ${color}`}
@@ -213,7 +262,14 @@ function Badge({ label, color }: { label: string; color: string }) {
   )
 }
 
-function QuickViewModal({ product, onClose }: { product: Product; onClose: () => void }) {
+/* QUICK VIEW MODAL (UNCHANGED) */
+function QuickViewModal({
+  product,
+  onClose,
+}: {
+  product: Product
+  onClose: () => void
+}) {
   const { addToCart } = useStore()
 
   return (
