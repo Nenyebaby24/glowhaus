@@ -38,7 +38,11 @@ export default function RootLayout({
 
         <Footer />
         <Toaster  
-         position="bottom-right"
+         position={
+         typeof window !== "undefined" && window.innerWidth < 768
+         ? "bottom-center"
+         : "bottom-right"
+       }
          gutter={8}
          containerStyle={{
          bottom: 24,
