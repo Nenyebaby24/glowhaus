@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Heart, Star, Eye, ShoppingCart, X } from "lucide-react"
 import { useState } from "react"
 import { useStore } from "@/store/useStore"
+import { Toasts } from "@/lib/toastTriggers"
 
 interface Product {
   id: string

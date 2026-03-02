@@ -7,42 +7,40 @@ import {
   PointTransaction,
   Tier,
 } from "../types";
+import { Toasts } from "@/lib/toastTriggers"
 
-/* ---------------- CART SLICE ---------------- */
+/* =========================================================
+   TYPES & INTERFACES
+========================================================= */
 
 interface CartSlice {
   cartItems: CartItem[];
+  cartTotal: number;
+  cartCount: number;
   addToCart: (product: Product, options?: Record<string, string>) => void;
   removeFromCart: (id: string) => void;
   updateQuantity: (id: string, qty: number) => void;
   clearCart: () => void;
-  cartTotal: number;
-  cartCount: number;
 }
-
-/* ---------------- WISHLIST SLICE ---------------- */
 
 interface WishlistSlice {
   wishlistItems: Product[];
   addToWishlist: (product: Product) => void;
   removeFromWishlist: (id: string) => void;
+  toggleWishlist: (product: Product) => void;
   isWishlisted: (id: string) => boolean;
   moveWishlistToCart: (id: string) => void;
   clearWishlist: () => void;
 }
 
-/* ---------------- LOYALTY SLICE ---------------- */
-
 interface LoyaltySlice {
   points: number;
   tier: Tier;
   pointsHistory: PointTransaction[];
+  tierBenefits: string[];
   addPoints: (amount: number, reason: string) => void;
   redeemPoints: (amount: number) => void;
-  tierBenefits: string[];
 }
-
-/* ---------------- BOOKING SLICE (UPDATED) ---------------- */
 
 interface Booking {
   service: Service | null;
@@ -62,14 +60,10 @@ interface BookingSlice {
   bookingHistory: Booking[];
   setBookingService: (service: Service) => void;
   setBookingDateTime: (date: string, time: string) => void;
-  setBookingCustomer: (
-    data: Partial<Booking["customer"]>
-  ) => void;
+  setBookingCustomer: (data: Partial<Booking["customer"]>) => void;
   confirmBooking: () => void;
   clearBooking: () => void;
 }
-
-/* ---------------- UI SLICE ---------------- */
 
 interface UISlice {
   cartOpen: boolean;
@@ -80,42 +74,22 @@ interface UISlice {
   setMobileMenuOpen: (v: boolean) => void;
 }
 
-/* ---------------- USER SLICE ---------------- */
-export interface Address {
-  id: string
-  value: string
+export interface Address { id: string; value: string; }
+export interface Notifications { emailOffers: boolean; orderUpdates: boolean; newArrivals: boolean; }
+export interface User { name: string; email: string; }
+
+interface UserSlice {
+  user: User | null;
+  isLoggedIn: boolean;
+  addresses: Address[];
+  notifications: Notifications;
+  updateUser: (data: Partial<User>) => void;
+  addAddress: (value: string) => void;
+  updateAddress: (id: string, value: string) => void;
+  deleteAddress: (id: string) => void;
+  toggleNotification: (key: keyof Notifications) => void;
+  deleteAccount: () => void;
 }
-
-export interface Notifications {
-  emailOffers: boolean
-  orderUpdates: boolean
-  newArrivals: boolean
-}
-
-export interface User {
-  name: string
-  email: string
-}
-
-export interface UserSlice {
-  user: User | null
-  isLoggedIn: boolean
-
-  addresses: Address[]
-  notifications: Notifications
-
-  updateUser: (data: Partial<User>) => void
-
-  addAddress: (value: string) => void
-  updateAddress: (id: string, value: string) => void
-  deleteAddress: (id: string) => void
-
-  toggleNotification: (key: keyof Notifications) => void
-
-  deleteAccount: () => void
-}
-
-/* ---------------- RECENTLY VIEWED SLICE ---------------- */
 
 interface RecentlyViewedSlice {
   recentlyViewed: string[];
@@ -123,364 +97,168 @@ interface RecentlyViewedSlice {
   removeRecentlyViewed: (id: string) => void;
 }
 
-/* ---------------- STORE TYPE ---------------- */
+type StoreState = CartSlice & WishlistSlice & LoyaltySlice & BookingSlice & UISlice & UserSlice & RecentlyViewedSlice;
 
-type StoreState =
-  & CartSlice
-  & WishlistSlice
-  & LoyaltySlice
-  & BookingSlice
-  & UISlice
-  & UserSlice
-  & RecentlyViewedSlice;
-
-/* ---------------- STORE ---------------- */
+/* =========================================================
+   ZUSTAND STORE IMPLEMENTATION
+========================================================= */
 
 export const useStore = create<StoreState>()(
   devtools(
     persist(
       (set, get) => ({
 
-        /* ---------------- CART ---------------- */
+        /* --- CART LOGIC --- */
+        /* ===================== CART ===================== */
 
-        cartItems: [],
+                  cartItems: [],
 
-        addToCart: (product, options) =>
-          set((state) => {
-            const existing = state.cartItems.find(
-              (item) => item.product.id === product.id
-            );
-
-            if (existing) {
-              return {
-                cartItems: state.cartItems.map((item) =>
-                  item.product.id === product.id
-                    ? { ...item, quantity: item.quantity + 1 }
-                    : item
-                ),
-              };
-            }
-
-            return {
-              cartItems: [
-                ...state.cartItems,
-                {
-                  id: crypto.randomUUID(),
-                  product,
-                  quantity: 1,
-                  selectedOptions: options,
-                },
-              ],
-            };
-          }),
-
-        removeFromCart: (id) =>
-          set((state) => ({
-            cartItems: state.cartItems.filter((item) => item.id !== id),
-          })),
-
-        updateQuantity: (id, qty) =>
-          set((state) => ({
-            cartItems: state.cartItems.map((item) =>
-              item.id === id ? { ...item, quantity: qty } : item
-            ),
-          })),
-
-        clearCart: () => set({ cartItems: [] }),
-
-        get cartTotal() {
-          return get().cartItems.reduce(
-            (total, item) => total + item.product.price * item.quantity,
-            0
-          );
-        },
-
-        get cartCount() {
-          return get().cartItems.reduce(
-            (count, item) => count + item.quantity,
-            0
-          );
-        },
-
-    /* ---------------- WISHLIST ---------------- */
-
-             wishlistItems: [],
-
-            addToWishlist: (product) =>
+             addToCart: (product, options) =>
             set((state) => {
-         if (state.wishlistItems.some((p) => p.id === product.id)) {
-           return state;
-            }
-
-            return {
-           wishlistItems: [...state.wishlistItems, product],
-           };
-           }),
-
-        removeFromWishlist: (id) =>
-        set((state) => ({
-         wishlistItems: state.wishlistItems.filter((p) => p.id !== id),
-           })),
-
-         isWishlisted: (id) =>
-         get().wishlistItems.some((p) => p.id === id),
-
-         moveWishlistToCart: (id) =>
-          set((state) => {
-         const product = state.wishlistItems.find((p) => p.id === id);
-         if (!product) return state;
-
           const existing = state.cartItems.find(
-          (item) => item.product.id === product.id
-         );
-
-        let updatedCart;
-
-        if (existing) {
-          updatedCart = state.cartItems.map((item) =>
-            item.product.id === product.id
-          ? { ...item, quantity: item.quantity + 1 }
-          : item
+            (item) => item.product.id === product.id
           );
-           } else {
-          updatedCart = [
-          ...state.cartItems,
+
+         if (existing) {
+      Toasts.addToCart();
+
+           return {
+           cartItems: state.cartItems.map((item) =>
+          item.product.id === product.id
+            ? { ...item, quantity: item.quantity + 1 }
+            : item
+          ),
+         cartOpen: true,
+         };
+         }
+
+          Toasts.addToCart();
+
+          return {
+          cartItems: [
+           ...state.cartItems,
           {
           id: crypto.randomUUID(),
           product,
           quantity: 1,
-          },
-         ];
-         }
+          selectedOptions: options,
+           },
+           ],
+          cartOpen: true,
+           };
+            }),
 
+          removeFromCart: (id) =>
+          set((state) => ({
+         cartItems: state.cartItems.filter((item) => item.id !== id),
+        })),
+
+         updateQuantity: (id, qty) =>
+        set((state) => {
+        if (qty <= 0) {
            return {
-         cartItems: updatedCart,
-          wishlistItems: state.wishlistItems.filter(
-        (p) => p.id !== id
-          ),
+        cartItems: state.cartItems.filter((i) => i.id !== id),
+        };
+        }
+
+    return {
+      cartItems: state.cartItems.map((item) =>
+        item.id === id ? { ...item, quantity: qty } : item
+      ),
+    };
+  }),
+
+           clearCart: () => set({ cartItems: [] }),
+
+            get cartTotal() {
+              return get().cartItems.reduce(
+            (total, item) =>
+          total + item.product.price * item.quantity,
+           0
+          );
+          },
+
+             get cartCount() {
+              return get().cartItems.reduce(
+            (count, item) => count + item.quantity,
+            0
+            );
+           },
+        /* --- WISHLIST LOGIC --- */
+        wishlistItems: [],
+        addToWishlist: (product) => set((state) => {
+          if (state.wishlistItems.some((p) => p.id === product.id)) return state;
+          return { wishlistItems: [...state.wishlistItems, product] };
+        }),
+        removeFromWishlist: (id) => set((state) => ({
+          wishlistItems: state.wishlistItems.filter((p) => p.id !== id),
+        })),
+        toggleWishlist: (product) => set((state) => {
+          const exists = state.wishlistItems.some((p) => p.id === product.id);
+          return {
+            wishlistItems: exists 
+              ? state.wishlistItems.filter((p) => p.id !== product.id)
+              : [...state.wishlistItems, product],
           };
-         }),
+        }),
+        isWishlisted: (id) => get().wishlistItems.some((p) => p.id === id),
+        moveWishlistToCart: (id) => set((state) => {
+          const product = state.wishlistItems.find((p) => p.id === id);
+          if (!product) return state;
+          const existing = state.cartItems.find(item => item.product.id === product.id);
+          const updatedCart = existing
+            ? state.cartItems.map(item => item.product.id === product.id ? { ...item, quantity: item.quantity + 1 } : item)
+            : [...state.cartItems, { id: crypto.randomUUID(), product, quantity: 1 }];
+          return {
+            cartItems: updatedCart,
+            wishlistItems: state.wishlistItems.filter((p) => p.id !== id),
+            cartOpen: true,
+          };
+        }),
+        clearWishlist: () => set({ wishlistItems: [] }),
 
-        clearWishlist: () =>
-        set(() => ({
-         wishlistItems: [],
-           })),
-
-        /* ---------------- LOYALTY ---------------- */
-
+        /* --- LOYALTY LOGIC --- */
         points: 0,
         tier: "Bronze",
         pointsHistory: [],
+        tierBenefits: ["Exclusive Discounts", "Priority Booking", "Birthday Rewards"],
+        addPoints: (amount, reason) => set((state) => {
+          const newPoints = state.points + amount;
+          const tier: Tier = newPoints >= 5000 ? "Platinum" : newPoints >= 2000 ? "Gold" : newPoints >= 1000 ? "Silver" : "Bronze";
+          return {
+            points: newPoints, tier,
+            pointsHistory: [...state.pointsHistory, { id: crypto.randomUUID(), amount, reason, date: new Date().toISOString() }],
+          };
+        }),
+        redeemPoints: (amount) => set((state) => ({ points: Math.max(0, state.points - amount) })),
 
-        addPoints: (amount, reason) =>
-          set((state) => {
-            const newPoints = state.points + amount;
-
-            const tier: Tier =
-              newPoints >= 5000
-                ? "Platinum"
-                : newPoints >= 2000
-                ? "Gold"
-                : newPoints >= 1000
-                ? "Silver"
-                : "Bronze";
-
-            return {
-              points: newPoints,
-              tier,
-              pointsHistory: [
-                ...state.pointsHistory,
-                {
-                  id: crypto.randomUUID(),
-                  amount,
-                  reason,
-                  date: new Date().toISOString(),
-                },
-              ],
-            };
-          }),
-
-        redeemPoints: (amount) =>
-          set((state) => ({
-            points: Math.max(0, state.points - amount),
-          })),
-
-        tierBenefits: [
-          "Exclusive Discounts",
-          "Priority Booking",
-          "Birthday Rewards",
-        ],
-
-        /* ---------------- BOOKING (UPDATED) ---------------- */
-
-        booking: {
-          service: null,
-          date: null,
-          time: null,
-          customer: {
-            name: "",
-            phone: "",
-            email: "",
-            notes: "",
-            referral: "",
-          },
-        },
-
+        /* --- BOOKING, UI, RECENTLY VIEWED, & USER SLICES --- */
+        booking: { service: null, date: null, time: null, customer: { name: "", phone: "", email: "", notes: "", referral: "" } },
         bookingHistory: [],
-
-        setBookingService: (service) =>
-          set((state) => ({
-            booking: { ...state.booking, service },
-          })),
-
-        setBookingDateTime: (date, time) =>
-          set((state) => ({
-            booking: { ...state.booking, date, time },
-          })),
-
-        setBookingCustomer: (data) =>
-          set((state) => ({
-            booking: {
-              ...state.booking,
-              customer: {
-                ...state.booking.customer,
-                ...data,
-              },
-            },
-          })),
-
-        confirmBooking: () =>
-          set((state) => ({
-            bookingHistory: [
-              ...state.bookingHistory,
-              { ...state.booking },
-            ],
-          })),
-
-        clearBooking: () =>
-          set((state) => ({
-            booking: {
-              service: null,
-              date: null,
-              time: null,
-              customer: {
-                name: "",
-                phone: "",
-                email: "",
-                notes: "",
-                referral: "",
-              },
-            },
-          })),
-
-        /* ---------------- UI ---------------- */
-
-        cartOpen: false,
-        searchOpen: false,
-        mobileMenuOpen: false,
-
-        setCartOpen: (v) => set({ cartOpen: v }),
-        setSearchOpen: (v) => set({ searchOpen: v }),
-        setMobileMenuOpen: (v) => set({ mobileMenuOpen: v }),
-
-        /* ---------------- RECENTLY VIEWED ---------------- */
-
+        setBookingService: (service) => set((state) => ({ booking: { ...state.booking, service } })),
+        setBookingDateTime: (date, time) => set((state) => ({ booking: { ...state.booking, date, time } })),
+        setBookingCustomer: (data) => set((state) => ({ booking: { ...state.booking, customer: { ...state.booking.customer, ...data } } })),
+        confirmBooking: () => set((state) => ({ bookingHistory: [...state.bookingHistory, { ...state.booking }] })),
+        clearBooking: () => set((state) => ({ booking: { service: null, date: null, time: null, customer: { name: "", phone: "", email: "", notes: "", referral: "" } } })),
+        cartOpen: false, searchOpen: false, mobileMenuOpen: false,
+        setCartOpen: (v) => set({ cartOpen: v }), setSearchOpen: (v) => set({ searchOpen: v }), setMobileMenuOpen: (v) => set({ mobileMenuOpen: v }),
         recentlyViewed: [],
-
-        addRecentlyViewed: (id) =>
-          set((state) => {
-            const filtered = state.recentlyViewed.filter(
-              (item) => item !== id
-            );
-
-            return {
-              recentlyViewed: [id, ...filtered].slice(0, 10),
-            };
-          }),
-
-        removeRecentlyViewed: (id) =>
-          set((state) => ({
-            recentlyViewed: state.recentlyViewed.filter(
-              (item) => item !== id
-            ),
-          })),
-
-        /* ---------------- USER ---------------- */
-
-        
-  user: {
-    name: "Jane Doe",
-    email: "jane@example.com",
-  },
-
-  isLoggedIn: true,
-
-  addresses: [
-    {
-      id: "1",
-      value: "221B Baker Street, London",
-    },
-  ],
-
-  notifications: {
-    emailOffers: true,
-    orderUpdates: true,
-    newArrivals: false,
-  },
-
-  /* =========================
-     USER ACTIONS
-  ========================== */
-
-  updateUser: (data) =>
-    set((state) => ({
-      user: state.user
-        ? { ...state.user, ...data }
-        : state.user,
-    })),
-
-  addAddress: (value) =>
-    set((state) => ({
-      addresses: [
-        ...state.addresses,
-        {
-          id: crypto.randomUUID(),
-          value,
-        },
-      ],
-    })),
-
-  updateAddress: (id, value) =>
-    set((state) => ({
-      addresses: state.addresses.map((addr) =>
-        addr.id === id ? { ...addr, value } : addr
-      ),
-    })),
-
-  deleteAddress: (id) =>
-    set((state) => ({
-      addresses: state.addresses.filter(
-        (addr) => addr.id !== id
-      ),
-    })),
-
-  toggleNotification: (key) =>
-    set((state) => ({
-      notifications: {
-        ...state.notifications,
-        [key]: !state.notifications[key],
-      },
-    })),
-
-  deleteAccount: () =>
-    set(() => ({
-      user: null,
-      isLoggedIn: false,
-      addresses: [],
-    })),
-
-  }),
-      
+        addRecentlyViewed: (id) => set((state) => {
+          const filtered = state.recentlyViewed.filter(item => item !== id);
+          return { recentlyViewed: [id, ...filtered].slice(0, 10) };
+        }),
+        removeRecentlyViewed: (id) => set((state) => ({ recentlyViewed: state.recentlyViewed.filter(item => item !== id) })),
+        user: { name: "Jane Doe", email: "jane@example.com" },
+        isLoggedIn: true,
+        addresses: [{ id: "1", value: "221B Baker Street, London" }],
+        notifications: { emailOffers: true, orderUpdates: true, newArrivals: false },
+        updateUser: (data) => set((state) => ({ user: state.user ? { ...state.user, ...data } : state.user })),
+        addAddress: (value) => set((state) => ({ addresses: [...state.addresses, { id: crypto.randomUUID(), value }] })),
+        updateAddress: (id, value) => set((state) => ({ addresses: state.addresses.map(addr => addr.id === id ? { ...addr, value } : addr) })),
+        deleteAddress: (id) => set((state) => ({ addresses: state.addresses.filter(addr => addr.id !== id) })),
+        toggleNotification: (key) => set((state) => ({ notifications: { ...state.notifications, [key]: !state.notifications[key] } })),
+        deleteAccount: () => set(() => ({ user: null, isLoggedIn: false, addresses: [] })),
+      }),
       {
         name: "app-storage",
         partialize: (state) => ({
@@ -488,17 +266,14 @@ export const useStore = create<StoreState>()(
           wishlistItems: state.wishlistItems,
           points: state.points,
           tier: state.tier,
-          pointsHistory: state.pointsHistory,
           user: state.user,
           isLoggedIn: state.isLoggedIn,
-          addresses: state.addresses,
-          notifications: state.notifications,
           recentlyViewed: state.recentlyViewed,
         }),
       }
     ),
     { enabled: process.env.NODE_ENV === "development" }
   )
-  
 );
+
 export default useStore;

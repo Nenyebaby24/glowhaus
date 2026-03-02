@@ -20,7 +20,8 @@ interface ToastAction {
 
 const variantStyles: Record<ToastVariant, string> = {
   gold: "border-gold",
-  "gold-special": "border-gold shadow-[0_0_20px_rgba(212,175,55,0.5)]",
+  "gold-special":
+    "border-gold shadow-[0_0_20px_rgba(212,175,55,0.5)]",
   rose: "border-rose-400",
   neutral: "border-gray-400",
   blue: "border-blue-500",
@@ -44,7 +45,7 @@ export function glowToast(
     variant?: ToastVariant
     action?: ToastAction
   }
-) {
+): string {
   if (activeToasts.length >= 3) {
     toast.dismiss(activeToasts[0])
     activeToasts.shift()
@@ -55,7 +56,9 @@ export function glowToast(
       initial={{ opacity: 0, y: 60, scale: 0.95 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 20 }}
-      className={`bg-ivory border-l-4 ${variantStyles[variant]} rounded-xl px-5 py-4 shadow-gold flex items-center gap-3 min-w-[280px]`}
+      className={`bg-ivory border-l-4 ${
+        variantStyles[variant]
+      } rounded-xl px-5 py-4 shadow-gold flex items-center gap-3 min-w-[280px]`}
     >
       {icon && <span className="text-xl">{icon}</span>}
 
@@ -89,4 +92,6 @@ export function glowToast(
   setTimeout(() => {
     activeToasts = activeToasts.filter((tid) => tid !== id)
   }, 3500)
+
+  return id  // 👈 IMPORTANT
 }
