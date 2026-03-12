@@ -1,7 +1,7 @@
 "use client"
 
 import useEmblaCarousel from "embla-carousel-react"
-import ProductCard from "@/components/product/ProductCard"
+import ProductCard from "@/components/catalogue/ProductCard"
 import { products } from "@/lib/dummy-data/products"
 
 interface Props {

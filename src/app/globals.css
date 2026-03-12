@@ -24,6 +24,7 @@
   /* Fonts - Simplified and mapped to Tailwind classes */
   --font-display: "Playfair Display", serif;
   --font-sans: "DM Sans", sans-serif;
+  --font-cormorant: "Cormorant Garamond", serif;
   
   /* Adding your custom animation to the theme so you can use 'animate-marquee' */
   --animate-marquee: marquee 15s linear infinite;

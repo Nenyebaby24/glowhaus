@@ -1,16 +1,22 @@
 // app/layout.tsx
-import SearchHotkey from "@/components/search/SearchHotkey"
-import SearchOverlay from "@/components/search/SearchOverlay"
+import OfflineBanner from "@/components/layout/OfflineBanner"
 import type { Metadata } from "next"
 import Navbar from "@/components/layout/Navbar"
 import Footer from "@/components/layout/Footer"
 import { Toaster } from "react-hot-toast"
+import SearchHotkey from "@/components/search/SearchHotkey"
+import SearchOverlay from "@/components/search/SearchOverlay"
 
 
 import "@fontsource/playfair-display/400.css"
 import "@fontsource/playfair-display/700.css"
 import "@fontsource/dm-sans/400.css"
 import "@fontsource/dm-sans/700.css"
+
+
+import "@fontsource/cormorant-garamond/400.css"
+import "@fontsource/cormorant-garamond/600.css"
+import "@fontsource/cormorant-garamond/700.css"
 
 import "./globals.css"
 
@@ -30,6 +36,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className="font-sans antialiased bg-noir text-taupe">
+        <OfflineBanner />
         <Navbar />
 
         <main className="min-h-screen">

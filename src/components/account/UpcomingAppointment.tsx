@@ -1,24 +1,36 @@
 "use client"
 
 import { useAccountStore } from "@/store/accountStore"
+import EmptyState from "@/components/ui/EmptyState"
+import CalendarIllustration from "@/components/ui/CalendarIllustration"
+import Link from "next/link"
 
 export default function UpcomingAppointment() {
   const upcomingAppointment = useAccountStore(
     (state) => state.upcomingAppointment
   )
 
+  /* ================= EMPTY STATE ================= */
+
   if (!upcomingAppointment) {
     return (
       <div className="bg-white rounded-2xl p-6 shadow-sm">
-        <h2 className="text-lg font-semibold mb-2">
+        <h2 className="text-lg font-semibold mb-6">
           Upcoming Appointment
         </h2>
-        <p className="text-sm text-gray-500">
-          You have no upcoming appointments.
-        </p>
+
+        <EmptyState
+          icon={<CalendarIllustration />}
+          title="No bookings yet"
+          description="Book your next GlowHaus experience and let us pamper you."
+          ctaLabel="Book a Service"
+          ctaHref="/booking"
+        />
       </div>
     )
   }
+
+  /* ================= FILLED STATE ================= */
 
   return (
     <div className="bg-white rounded-2xl p-6 shadow-sm">
@@ -50,9 +62,12 @@ export default function UpcomingAppointment() {
         </span>
       </div>
 
-      <button className="mt-5 text-sm font-medium text-black underline hover:opacity-70 transition">
+      <Link
+        href="/booking"
+        className="mt-5 inline-block text-sm font-medium text-black underline hover:opacity-70 transition"
+      >
         Manage Appointment
-      </button>
+      </Link>
     </div>
   )
 }

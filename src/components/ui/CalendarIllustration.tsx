@@ -1,0 +1,45 @@
+export default function CalendarIllustration() {
+  return (
+    <svg
+      width="140"
+      height="140"
+      viewBox="0 0 200 200"
+      fill="none"
+      className="text-gold"
+    >
+      <rect
+        x="40"
+        y="60"
+        width="120"
+        height="100"
+        rx="12"
+        stroke="currentColor"
+        strokeWidth="4"
+      />
+      <line
+        x1="40"
+        y1="90"
+        x2="160"
+        y2="90"
+        stroke="currentColor"
+        strokeWidth="4"
+      />
+      <line
+        x1="70"
+        y1="40"
+        x2="70"
+        y2="70"
+        stroke="currentColor"
+        strokeWidth="4"
+      />
+      <line
+        x1="130"
+        y1="40"
+        x2="130"
+        y2="70"
+        stroke="currentColor"
+        strokeWidth="4"
+      />
+    </svg>
+  )
+}
