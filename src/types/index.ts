@@ -7,8 +7,14 @@ export interface Product {
   images?: string[];
   rating?: number;   // For the Star ratings
   reviews?: number;  // Fixes the BestsellerCard error
-  category?: string;
+  category: string;
   description?: string;
+  stock?: number;
+  isSale?: boolean;
+  originalPrice?: number;
+  details?: string[];
+  slug: string;
+  
 }
 
 export interface CartItem {

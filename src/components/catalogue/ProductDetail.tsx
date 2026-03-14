@@ -3,7 +3,8 @@
 import { useState, useEffect } from "react"
 import { motion } from "framer-motion"
 import useEmblaCarousel from "embla-carousel-react"
-import ReactImageMagnify from "react-image-magnify"
+import Zoom from "react-medium-image-zoom"
+import "react-medium-image-zoom/dist/styles.css"
 import { useStore } from "@/store/useStore"
 import type { Product } from "@/types"
 import ReviewsSection from "@/components/reviews/ReviewsSection"
@@ -19,7 +20,7 @@ interface Props {
 export default function ProductDetail({ product }: Props) {
   const addToCart = useStore(s => s.addToCart)
   const toggleWishlist = useStore(s => s.toggleWishlist)
-  const wishlist = useStore(s => s.wishlist)
+  const wishlistItems = useStore(s => s.wishlistItems)
   const addRecentlyViewed = useStore(s => s.addRecentlyViewed)
 
   const [selectedImage, setSelectedImage] = useState(product.images?.[0])
@@ -29,7 +30,7 @@ export default function ProductDetail({ product }: Props) {
 
   const [emblaRef] = useEmblaCarousel()
 
-  const isWishlisted = wishlist.includes(product.id)
+  const isWishlisted = wishlistItems.some(item => item.id === product.id)
 
   const stock = product.stock ?? 10
 
@@ -40,11 +41,10 @@ export default function ProductDetail({ product }: Props) {
   }, [product?.id, addRecentlyViewed])
 
   const handleAdd = () => {
-    addToCart({
-      ...product,
-      quantity,
-      selectedLength,
-      selectedShade,
+    addToCart(product, {
+      quantity: quantity.toString(),
+      selectedLength: selectedLength || "",
+      selectedShade: selectedShade || "",
     })
   }
 
@@ -57,20 +57,15 @@ export default function ProductDetail({ product }: Props) {
 
           {/* Main Image + Zoom */}
           <div className="relative">
-            <ReactImageMagnify
-              {...{
-                smallImage: {
-                  alt: product.name,
-                  isFluidWidth: true,
-                  src: selectedImage,
-                },
-                largeImage: {
-                  src: selectedImage,
-                  width: 1200,
-                  height: 1800,
-                },
-              }}
-            />
+           <Zoom>
+              <img
+                alt={product.name}
+                src={selectedImage}
+                className="w-full h-auto object-cover rounded-lg cursor-zoom-in"
+              />
+            </Zoom>
+              
+            
 
             {/* Badge */}
             {product.isSale && (
@@ -81,7 +76,7 @@ export default function ProductDetail({ product }: Props) {
 
             {/* Wishlist */}
             <button
-              onClick={() => toggleWishlist(product.id)}
+              onClick={() => toggleWishlist(product)}
               className="absolute top-4 right-4 bg-white p-2 rounded-full"
             >
               {isWishlisted ? "♥" : "♡"}
@@ -90,7 +85,7 @@ export default function ProductDetail({ product }: Props) {
 
           {/* Thumbnails */}
           <div className="flex gap-4 mt-6 overflow-x-auto">
-            {product.images.map((img) => (
+            {product.images || [].map((img) => (
               <img
                 key={img}
                 src={img}
@@ -181,7 +176,7 @@ export default function ProductDetail({ product }: Props) {
           </button>
 
           <button
-            onClick={() => toggleWishlist(product.id)}
+            onClick={() => toggleWishlist(product)}
             className="w-full border py-4"
           >
             Add to Wishlist
