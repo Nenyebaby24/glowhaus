@@ -4,21 +4,10 @@ import { Heart, Star, Eye, ShoppingCart, X } from "lucide-react"
 import { useState } from "react"
 import { useStore } from "@/store/useStore"
 import { Toasts } from "@/lib/toastTriggers"
+import type { Product } from "@/types"
 
-interface Product {
-  id: string
-  name: string
-  images: string[]
-  price: number
-  originalPrice?: number
-  rating: number
-  reviews: number
-  isNew?: boolean
-  isBestseller?: boolean
-  isOnSale?: boolean
-  inStock?: boolean
-  stockCount?: number
-}
+
+
 
 interface Props {
   product: Product
@@ -55,8 +44,7 @@ export default function ProductCard({
     }
   }
 
-  const soldOut = !product.inStock
-
+  const soldOut = (product.stock ?? 0) <= 0
   return (
     <>
       <motion.div
@@ -78,7 +66,7 @@ export default function ProductCard({
         {/* IMAGE CONTAINER */}
         <div className="relative aspect-[3/4] overflow-hidden">
           <motion.img
-            src={product.images[0]}
+            src={product.images?.[0] ?? "/placeholder.jpg"}
             alt={product.name}
             className={`w-full h-full object-cover transition ${
               soldOut ? "grayscale" : ""
@@ -187,7 +175,7 @@ export default function ProductCard({
                 key={i}
                 size={14}
                 className={
-                  i < Math.round(product.rating)
+                  i < Math.round(product.rating ?? 0)
                     ? "fill-gold text-gold"
                     : "text-gray-300"
                 }
@@ -287,7 +275,8 @@ function QuickViewModal({
         className="bg-white rounded-2xl p-6 max-w-lg w-full"
       >
         <img
-          src={product.images[0]}
+          src={product.images?.[0] || "/placeholder-image.jpg"}
+          alt={product.name || "Product Image"}
           className="aspect-[3/4] object-cover rounded-lg mb-4"
         />
 

@@ -14,13 +14,17 @@ export interface Product {
   originalPrice?: number;
   details?: string[];
   slug: string;
+  isNew?: boolean; 
+  isBestseller?: boolean;
+  isOnSale?: boolean;
+  stockCount?: number;
   
 }
 
 export interface CartItem {
   id: string;
   product: Product;
-  quantity: number;
+  quantity?: number;
   selectedOptions?: Record<string, string>;
 }
 

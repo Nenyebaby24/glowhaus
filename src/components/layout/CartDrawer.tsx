@@ -112,7 +112,7 @@ export default function CartDrawer() {
                               onClick={() =>
                                 updateQuantity(
                                   item.id,
-                                  Math.max(1, item.quantity - 1)
+                                  Math.max(1, (item.quantity ?? 1) - 1)
                                 )
                               }
                               className="px-2 py-1"
@@ -126,7 +126,7 @@ export default function CartDrawer() {
                               onClick={() =>
                                 updateQuantity(
                                   item.id,
-                                  item.quantity + 1
+                                  item.quantity ?? 1 + 1
                                 )
                               }
                               className="px-2 py-1"
@@ -138,7 +138,7 @@ export default function CartDrawer() {
                           <span className="font-semibold text-sm">
                             ₦
                             {(
-                              item.product.price * item.quantity
+                             (item.product.price * (item.quantity ?? 0)).toLocaleString()
                             ).toLocaleString()}
                           </span>
                         </div>

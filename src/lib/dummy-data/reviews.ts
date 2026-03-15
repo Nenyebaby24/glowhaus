@@ -7,6 +7,11 @@ export interface Review {
   date: string;
   verified: boolean;
   hasImage: boolean;
+  body: string;
+  helpfulYes: number;
+  helpfulNo: number;
+  headline: string;
+  [key: string]: any;
 }
 
 export const reviews: Review[] = [

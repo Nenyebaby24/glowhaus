@@ -12,7 +12,7 @@ export default function CompleteTheLook() {
 
   const handleAddAll = () => {
     bundle.forEach(product => {
-      addToCart({ ...product, quantity: 1 })
+      addToCart({ ...product, quantity: 1 } as any)
     })
     alert("Bundle added to cart ✨")
   }

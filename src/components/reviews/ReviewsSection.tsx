@@ -7,6 +7,7 @@ import WriteReviewModal from "./WriteReviewModal"
 
 interface Props {
   productId: string
+  
 }
 
 export default function ReviewsSection({ productId }: Props) {
