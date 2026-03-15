@@ -35,6 +35,9 @@ export default function WriteReviewModal({
       verified: true,
       helpfulYes: 0,
       helpfulNo: 0,
+      productSlug: "silk-straight-wig", 
+      comment: body, // usually the same as body
+      hasImage: false
     }
 
     onSubmit(newReview)

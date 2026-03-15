@@ -4,7 +4,7 @@ import { useState } from "react"
 import OrderDetailModal from "@/components/account/orders/OrderDetailModal"
 import { useAccountStore } from "@/store/accountStore"
 
-const [selectedOrder, setSelectedOrder] = useState<any>(null)
+
 
 const statusStyles: Record<
   "Processing" | "Shipped" | "Delivered" | "Cancelled",
@@ -17,6 +17,7 @@ const statusStyles: Record<
 }
 
 export default function OrdersPage() {
+  const [selectedOrder, setSelectedOrder] = useState<any>(null)
   const orders = useAccountStore((state) => state.orders)
 
   return (

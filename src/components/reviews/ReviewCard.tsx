@@ -39,10 +39,10 @@ export default function ReviewCard({ review }: { review: Review }) {
       </p>
 
       <div className="mt-4 text-sm text-gray-500 flex gap-6">
-        <button onClick={() => setYes(y => y + 1)}>
+        <button onClick={() => setYes(y => (y ?? 0)+ 1)}>
           👍 Yes ({yes})
         </button>
-        <button onClick={() => setNo(n => n + 1)}>
+        <button onClick={() => setNo(n => (n ?? 0)+ 1)}>
           👎 No ({no})
         </button>
       </div>

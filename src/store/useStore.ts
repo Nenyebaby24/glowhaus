@@ -125,7 +125,7 @@ export const useStore = create<StoreState>()(
            return {
            cartItems: state.cartItems.map((item) =>
           item.product.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
+            ? { ...item, quantity: (item.quantity ?? 0) + 1 }
             : item
           ),
          cartOpen: true,
@@ -173,15 +173,15 @@ export const useStore = create<StoreState>()(
             get cartTotal() {
               return get().cartItems.reduce(
             (total, item) =>
-          total + item.product.price * item.quantity,
+          total + item.product.price * (item.quantity ?? 0),
            0
           );
           },
 
              get cartCount() {
               return get().cartItems.reduce(
-            (count, item) => count + item.quantity,
-            0
+           (count, item) => count + (item.quantity ?? 0),
+             0
             );
            },
         /* --- WISHLIST LOGIC --- */
@@ -207,7 +207,7 @@ export const useStore = create<StoreState>()(
           if (!product) return state;
           const existing = state.cartItems.find(item => item.product.id === product.id);
           const updatedCart = existing
-            ? state.cartItems.map(item => item.product.id === product.id ? { ...item, quantity: item.quantity + 1 } : item)
+           ? state.cartItems.map(item => item.product.id === product.id ? { ...item, quantity: (item.quantity ?? 0) + 1 } : item)
             : [...state.cartItems, { id: crypto.randomUUID(), product, quantity: 1 }];
           return {
             cartItems: updatedCart,
